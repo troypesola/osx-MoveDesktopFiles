@@ -1,0 +1,56 @@
+#
+# MoveDesktopFiles Rule Base
+#
+# support conditions are tag=tagname and all
+# supported rules:
+#  add-date - appends yyyy-mm-dd to the filename before the extension
+#  datepath pattern - puts a date-based path in front of the filename
+#    supports Ruby date format strings, with
+#       %H for half year (H1 and H2)
+#       %Q for quarter year (Q1,Q2,Q3,and Q4)
+#  regex re, sub - ruby regular expression search and replace
+#  quit - quit processing rules for this file
+#  quit-tag - quit process rules and leave the tag
+#
+# only moves if the filename is altered
+#
+location: ~/Desktop
+rule_list:
+ -
+  cond: tag=Desktop
+  rules:
+    - quit-tag
+ -
+  cond: tag=Add-Date
+  rules:
+    - add-date
+ -
+  cond: tag=Site
+  rules:
+    - regex,"([^-]*)-(.*)","~/Sites/\1/_drafts/\2"
+    - quit
+ -
+  cond: tag=OneProjects
+  rules:
+    - regex,"~","/"    # replace deliminators
+    - regex,"^(.*)$","~/OneDrive/Projects/\1"  # update the path
+    - quit
+ -
+  cond: tag=Projects
+  rules:
+    - regex,"~","/"    # replace deliminators
+    - regex,"^(.*)$","~/Documents/Projects/\1"  # update the path
+    - quit
+ -
+  cond: all
+  rules:
+    - datepath, "%Y/%H"
+ -
+  cond: tag=OneDrive
+  rules:
+    - regex, "^(.*)$","~/OneDrive/\1"
+    - quit
+ -
+  cond: all
+  rules:
+    - regex, "^(.*)$","~/Dropbox/\1"
