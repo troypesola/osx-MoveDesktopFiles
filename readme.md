@@ -17,3 +17,4 @@ This project automates filing files from the desktop using file tags.  The tags 
 
 ## Rules
 
+_(see src/rules.yaml until documented)_
