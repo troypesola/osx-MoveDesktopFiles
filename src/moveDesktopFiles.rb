@@ -12,7 +12,7 @@ require 'fileutils'
 HOMEDIR = File.expand_path('~');
 DEBUGLEVEL =  'debug' # err, warning, notice, info, debug
 
-config = YAML.load_file("#{HOMEDIR}/.movefiles.yaml")
+config = YAML.load_file("#{HOMEDIR}/.moveDesktopFiles/rules.yaml")
 
 
 # puts rules.inspect
