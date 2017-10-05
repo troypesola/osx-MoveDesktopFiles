@@ -115,7 +115,7 @@ def doMoveFiles(folder,rules)
   # Loop over all files in the folder
   #
   Dir.foreach(folder) do |src_fname|
-    next if (src_fname =~/^[.~]/)
+    next if (src_fname =~/^[.~$]/)
 
     dst_fname = src_fname
     quit = false
