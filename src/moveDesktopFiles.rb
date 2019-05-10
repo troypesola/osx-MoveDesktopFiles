@@ -8,6 +8,7 @@ require 'rake'
 require 'pathname'
 require 'syslog'
 require 'fileutils'
+require 'date'
 
 HOMEDIR = File.expand_path('~');
 DEBUGLEVEL =  'debug' # err, warning, notice, info, debug
