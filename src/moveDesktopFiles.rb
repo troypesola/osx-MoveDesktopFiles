@@ -9,8 +9,27 @@ require 'pathname'
 require 'syslog'
 require 'fileutils'
 require 'date'
+require 'optparse'
+
+@options = {}
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: moveDesktopFiles.rb [options]"
+  opts.on '-d', '--dryrun', 'Dry run and do not execute'
+  opts.on '-v', '--[no-]verbose', 'Make the operation more talkative'
+  opts.on_tail("-h", "--help", "Show this message") do
+    print opts
+    exit
+  end
+end.parse!(into: @options)
+
+if (@options[:verbose])
+  print "options="
+  p @options
+end
+
 
 HOMEDIR = File.expand_path('~');
+TAGPATH = `brew --prefix`.chomp + "/bin/tag"
 DEBUGLEVEL =  'debug' # err, warning, notice, info, debug
 
 config = YAML.load_file("#{HOMEDIR}/.moveDesktopFiles/rules.yaml")
@@ -101,8 +120,14 @@ def doMove(src, dst)
   dst = dst.sub(/^[~\/]*/,"#{HOMEDIR}/")
   dumpMsg "     src=#{src} dst=#{dst}"
   p = Pathname.new(dst)
-  p.dirname.mkpath()
-  FileUtils.mv("#{src}","#{dst}")
+  if (@options[:verbose] || @options[:dryrun])
+    puts "    >>dirname.mkpath #{p}"
+  end
+  p.dirname.mkpath() if (!@options[:dryrun])
+  if (@options[:verbose] || @options[:dryrun])
+    puts "    >>FileUtils.mv(#{src},#{dst})"
+  end
+  FileUtils.mv("#{src}","#{dst}") if (!@options[:dryrun])
 end
 
 
@@ -122,7 +147,7 @@ def doMoveFiles(folder,rules)
     quit = false
 
     # get the Finder tags for the file
-    tags = `/usr/local/bin/tag -N -l "#{folder}/#{src_fname}"| cut -f2`
+    tags = `#{TAGPATH} -N -l "#{folder}/#{src_fname}"| cut -f2`
 
     #puts "   src=#{src_fname} tags=#{tags}"
     # Process the rules for the file
@@ -134,9 +159,14 @@ def doMoveFiles(folder,rules)
           puts "FOUND Tag match #{rl['cond']} src=#{src_fname}"
           dst_fname,quit = doRules(rl['rules'],dst_fname)
 
+          break if quit
+
           if this_tag !~ /-tag$/
             # remove the tag
-            `/usr/local/bin/tag -r "#{this_tag}" "#{folder}/#{src_fname}"`
+            if (@options[:verbose] || @options[:dryrun])
+              puts "    >>tag -r #{this_tag} #{folder}/#{src_fname}"
+            end
+            `#{TAGPATH} -r "#{this_tag}" "#{folder}/#{src_fname}"` if (!@options[:dryrun])
           end
         end
       when 'all'
